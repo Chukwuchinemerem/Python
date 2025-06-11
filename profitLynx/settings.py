@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-c0qz2c0u9ky69v8@27o54t&7l3l0(^*0tedzop8&+z%fii(tx#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['Profitlynx.onrender.com', 'www.yourdomain.com']
+ALLOWED_HOSTS = ['Profitlynx.onrender.com', 'www.yourdomain.com','127.0.0.1']
 
 AUTH_USER_MODEL = 'invest.User'
 
