@@ -1,0 +1,378 @@
+{% extends 'invest/base.html' %}
+{% load static %}
+
+{% block title %}Transaction History - Investment Platform{% endblock %}
+
+{% block content %}
+<div class="content-page">
+    <div class="content">
+        <div class="container-fluid py-4">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-gradient-info text-white">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h2 class="mb-2">Transaction History</h2>
+                                    <p class="mb-0 opacity-8">View all your transactions, deposits, and withdrawals</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="text-white-50">
+                                        <i class="fas fa-history fs-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <select class="form-select" id="transactionFilter">
+                                        <option value="all">All Transactions</option>
+                                        <option value="DEPOSIT">Deposits</option>
+                                        <option value="WITHDRAWAL">Withdrawals</option>
+                                        <option value="PROFIT">Profits</option>
+                                        <option value="REFERRAL">Referral Bonus</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="statusFilter">
+                                        <option value="all">All Status</option>
+                                        <option value="PENDING">Pending</option>
+                                        <option value="APPROVED">Approved</option>
+                                        <option value="REJECTED">Rejected</option>
+                                        <option value="COMPLETED">Completed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" class="form-control" id="dateFilter" placeholder="Filter by date">
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary w-100" onclick="applyFilters()">
+                                        <i class="fas fa-filter me-2"></i>Apply Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Transaction History</h5>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary active" onclick="showTab('transactions')">
+                                    All Transactions
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="showTab('deposits')">
+                                    Deposits Only
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="showTab('withdrawals')">
+                                    Withdrawals Only
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- All Transactions Tab -->
+                            <div id="transactions-tab" class="tab-content">
+                                {% if transactions %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="transactionsTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Type</th>
+                                                    <th>Amount</th>
+                                                    <th>Crypto</th>
+                                                    <th>Status</th>
+                                                    <th>Date</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for transaction in transactions %}
+                                                <tr data-type="{{ transaction.transaction_type }}" data-status="{{ transaction.status }}" data-date="{{ transaction.created_at|date:'Y-m-d' }}">
+                                                    <td><code>#{{ transaction.id|stringformat:"06d" }}</code></td>
+                                                    <td>
+                                                        <span class="badge 
+                                                            {% if transaction.transaction_type == 'DEPOSIT' %}bg-success
+                                                            {% elif transaction.transaction_type == 'WITHDRAWAL' %}bg-danger
+                                                            {% elif transaction.transaction_type == 'PROFIT' %}bg-warning
+                                                            {% elif transaction.transaction_type == 'REFERRAL' %}bg-info
+                                                            {% else %}bg-secondary{% endif %}">
+                                                            {{ transaction.get_transaction_type_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <strong class="
+                                                            {% if transaction.transaction_type == 'DEPOSIT' or transaction.transaction_type == 'PROFIT' %}text-success
+                                                            {% elif transaction.transaction_type == 'WITHDRAWAL' %}text-danger
+                                                            {% else %}text-primary{% endif %}">
+                                                            {% if transaction.transaction_type == 'DEPOSIT' or transaction.transaction_type == 'PROFIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                                                        </strong>
+                                                    </td>
+                                                    <td>
+                                                        {% if transaction.cryptocurrency %}
+                                                            {{ transaction.cryptocurrency.symbol }}
+                                                        {% else %}
+                                                            <span class="text-muted">N/A</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge 
+                                                            {% if transaction.status == 'APPROVED' or transaction.status == 'COMPLETED' %}bg-success
+                                                            {% elif transaction.status == 'REJECTED' %}bg-danger
+                                                            {% elif transaction.status == 'PENDING' %}bg-warning
+                                                            {% else %}bg-info{% endif %}">
+                                                            {{ transaction.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary" onclick="viewDetails('{{ transaction.id }}', '{{ transaction.transaction_type }}', '{{ transaction.amount }}', '{{ transaction.status }}', '{{ transaction.created_at|date:"M d, Y H:i" }}')">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-receipt fs-1 text-muted mb-3"></i>
+                                        <h5 class="text-muted">No transactions found</h5>
+                                        <p class="text-muted">Your transaction history will appear here</p>
+                                        <a href="{% url 'deposit' %}" class="btn btn-primary">Make Your First Deposit</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Deposits Tab -->
+                            <div id="deposits-tab" class="tab-content" style="display: none;">
+                                {% if deposit_requests %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Amount</th>
+                                                    <th>Crypto</th>
+                                                    <th>Investment Tier</th>
+                                                    <th>Status</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for deposit in deposit_requests %}
+                                                <tr>
+                                                    <td><code>#{{ deposit.id|stringformat:"06d" }}</code></td>
+                                                    <td><strong class="text-success">${{ deposit.amount|floatformat:2 }}</strong></td>
+                                                    <td>{{ deposit.cryptocurrency.symbol }}</td>
+                                                    <td><span class="badge bg-primary">{{ deposit.investment_tier.name }}</span></td>
+                                                    <td>
+                                                        <span class="badge 
+                                                            {% if deposit.status == 'APPROVED' %}bg-success
+                                                            {% elif deposit.status == 'REJECTED' %}bg-danger
+                                                            {% elif deposit.status == 'PENDING' %}bg-warning
+                                                            {% else %}bg-info{% endif %}">
+                                                            {{ deposit.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ deposit.created_at|date:"M d, Y H:i" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-download fs-1 text-muted mb-3"></i>
+                                        <h5 class="text-muted">No deposits found</h5>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Withdrawals Tab -->
+                            <div id="withdrawals-tab" class="tab-content" style="display: none;">
+                                {% if withdrawal_requests %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Amount</th>
+                                                    <th>Crypto</th>
+                                                    <th>Wallet</th>
+                                                    <th>Status</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for withdrawal in withdrawal_requests %}
+                                                <tr>
+                                                    <td><code>#{{ withdrawal.id|stringformat:"06d" }}</code></td>
+                                                    <td><strong class="text-danger">-${{ withdrawal.amount|floatformat:2 }}</strong></td>
+                                                    <td>{{ withdrawal.cryptocurrency.symbol }}</td>
+                                                    <td><code class="small">{{ withdrawal.wallet_address|truncatechars:15 }}</code></td>
+                                                    <td>
+                                                        <span class="badge 
+                                                            {% if withdrawal.status == 'APPROVED' %}bg-success
+                                                            {% elif withdrawal.status == 'REJECTED' %}bg-danger
+                                                            {% elif withdrawal.status == 'PENDING' %}bg-warning
+                                                            {% else %}bg-info{% endif %}">
+                                                            {{ withdrawal.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ withdrawal.created_at|date:"M d, Y H:i" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-upload fs-1 text-muted mb-3"></i>
+                                        <h5 class="text-muted">No withdrawals found</h5>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards - FIXED -->
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-arrow-down text-success fs-2 mb-2"></i>
+                            <h5 class="text-success">{{ stats.total_deposits }}</h5>
+                            <p class="text-muted mb-0">Total Deposits</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-arrow-up text-danger fs-2 mb-2"></i>
+                            <h5 class="text-danger">{{ stats.total_withdrawals }}</h5>
+                            <p class="text-muted mb-0">Total Withdrawals</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-clock text-warning fs-2 mb-2"></i>
+                            <h5 class="text-warning">{{ stats.pending_transactions }}</h5>
+                            <p class="text-muted mb-0">Pending</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-check-circle text-info fs-2 mb-2"></i>
+                            <h5 class="text-info">{{ stats.completed_transactions }}</h5>
+                            <p class="text-muted mb-0">Completed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Details Modal -->
+<div class="modal fade" id="transactionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Transaction Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-2">
+                    <div class="col-6"><strong>ID:</strong></div>
+                    <div class="col-6" id="modal-id"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Type:</strong></div>
+                    <div class="col-6" id="modal-type"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Amount:</strong></div>
+                    <div class="col-6" id="modal-amount"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Status:</strong></div>
+                    <div class="col-6" id="modal-status"></div>
+                </div>
+                <div class="row">
+                    <div class="col-6"><strong>Date:</strong></div>
+                    <div class="col-6" id="modal-date"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.tab-content { transition: opacity 0.3s ease; }
+.table th { border-top: none; font-weight: 600; color: #495057; }
+.badge { font-size: 0.75em; }
+</style>
+
+<script>
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+    document.getElementById(tabName + '-tab').style.display = 'block';
+    document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+function applyFilters() {
+    const typeFilter = document.getElementById('transactionFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    const rows = document.querySelectorAll('#transactionsTable tbody tr');
+    
+    rows.forEach(row => {
+        let show = true;
+        if (typeFilter !== 'all' && row.dataset.type !== typeFilter) show = false;
+        if (statusFilter !== 'all' && row.dataset.status !== statusFilter) show = false;
+        if (dateFilter && row.dataset.date !== dateFilter) show = false;
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+function viewDetails(id, type, amount, status, date) {
+    document.getElementById('modal-id').textContent = '#' + String(id).padStart(6, '0');
+    document.getElementById('modal-type').textContent = type;
+    document.getElementById('modal-amount').textContent = '$' + amount;
+    document.getElementById('modal-status').textContent = status;
+    document.getElementById('modal-date').textContent = date;
+    new bootstrap.Modal(document.getElementById('transactionModal')).show();
+}
+</script>
+{% endblock %}

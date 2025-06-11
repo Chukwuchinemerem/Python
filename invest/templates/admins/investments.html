@@ -1,0 +1,227 @@
+{% extends 'admins/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-page">
+    <div class="content">
+        <div class="container-fluid">
+            <!-- Page Title -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <div class="page-title-right">
+                            <ol class="breadcrumb m-0">
+                                <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+                                <li class="breadcrumb-item active">Investments</li>
+                            </ol>
+                        </div>
+                        <h4 class="page-title">Manage Investments</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Statistics Cards -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="card widget-flat text-bg-primary">
+                        <div class="card-body">
+                            <div class="float-end">
+                                <i class="ri-line-chart-line widget-icon"></i>
+                            </div>
+                            <h6 class="text-uppercase mt-0">Active Investments</h6>
+                            <h2 class="my-2">{{ active_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card widget-flat text-bg-success">
+                        <div class="card-body">
+                            <div class="float-end">
+                                <i class="ri-money-dollar-circle-line widget-icon"></i>
+                            </div>
+                            <h6 class="text-uppercase mt-0">Total Invested</h6>
+                            <h2 class="my-2">${{ total_invested|floatformat:2 }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card widget-flat text-bg-warning">
+                        <div class="card-body">
+                            <div class="float-end">
+                                <i class="ri-trophy-line widget-icon"></i>
+                            </div>
+                            <h6 class="text-uppercase mt-0">Total Profits</h6>
+                            <h2 class="my-2">${{ total_profits|floatformat:2 }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card widget-flat text-bg-info">
+                        <div class="card-body">
+                            <div class="float-end">
+                                <i class="ri-check-line widget-icon"></i>
+                            </div>
+                            <h6 class="text-uppercase mt-0">Completed</h6>
+                            <h2 class="my-2">{{ completed_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Investments Table -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="header-title mb-3">All Investments</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Tier</th>
+                                            <th>Amount</th>
+                                            <th>ROI</th>
+                                            <th>Profit Earned</th>
+                                            <th>Profit %</th>
+                                            <th>Start Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for investment in investments %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ investment.user.username }}</strong><br>
+                                                <small class="text-muted">{{ investment.user.email }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ investment.tier.name }}</span>
+                                            </td>
+                                            <td>${{ investment.amount|floatformat:2 }}</td>
+                                            <td>{{ investment.tier.roi_percentage }}%</td>
+                                            <td>${{ investment.profit_earned|floatformat:2 }}</td>
+                                            <td>
+                                                {% widthratio investment.profit_earned investment.amount 100 as profit_percent %}
+                                                <span class="badge {% if profit_percent >= investment.tier.roi_percentage %}bg-success{% else %}bg-warning{% endif %}">
+                                                    {{ profit_percent|floatformat:1 }}%
+                                                </span>
+                                            </td>
+                                            <td>{{ investment.start_date|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if investment.is_completed %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% else %}
+                                                    <span class="badge bg-primary">Active</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if not investment.is_completed %}
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-sm btn-success" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#addProfitModal{{ investment.id }}">
+                                                            <i class="ri-add-line"></i> Add Profit
+                                                        </button>
+                                                        <form method="post" style="display: inline;">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="investment_id" value="{{ investment.id }}">
+                                                            <input type="hidden" name="action" value="complete">
+                                                            <button type="submit" class="btn btn-sm btn-warning"
+                                                                    onclick="return confirm('Mark this investment as completed?')">
+                                                                <i class="ri-check-line"></i> Complete
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted">No actions</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <!-- Add Profit Modal -->
+                                        <div class="modal fade" id="addProfitModal{{ investment.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Add Profit - {{ investment.user.username }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form method="post">
+                                                        {% csrf_token %}
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="investment_id" value="{{ investment.id }}">
+                                                            <input type="hidden" name="action" value="add_profit">
+                                                            
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Investment Details</label>
+                                                                <div class="card bg-light">
+                                                                    <div class="card-body p-2">
+                                                                        <small>
+                                                                            <strong>Tier:</strong> {{ investment.tier.name }} ({{ investment.tier.roi_percentage }}% ROI)<br>
+                                                                            <strong>Amount:</strong> ${{ investment.amount|floatformat:2 }}<br>
+                                                                            <strong>Current Profit:</strong> ${{ investment.profit_earned|floatformat:2 }}
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="mb-3">
+                                                                <label for="profit_amount{{ investment.id }}" class="form-label">Profit Amount ($)</label>
+                                                                <input type="number" 
+                                                                       class="form-control" 
+                                                                       id="profit_amount{{ investment.id }}"
+                                                                       name="profit_amount" 
+                                                                       step="0.01" 
+                                                                       min="0.01" 
+                                                                       required
+                                                                       placeholder="Enter profit amount">
+                                                            </div>
+                                                            
+                                                            <div class="alert alert-info">
+                                                                <small>
+                                                                    <i class="ri-information-line"></i>
+                                                                    This will add the specified amount to the user's balance and profit history.
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-success">Add Profit</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="9" class="text-center py-4">
+                                                <div class="text-muted">
+                                                    <i class="ri-inbox-line" style="font-size: 2rem;"></i>
+                                                    <p class="mt-2">No investments found</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

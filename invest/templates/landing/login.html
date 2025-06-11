@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Ethical</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #001D4B;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+  {% include 'admins/_alerts.html' %}
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
+    <div class="text-center mb-6">
+      <a href="{% url 'home' %}">
+        <img src="https://i.ibb.co/WKLPPNG/Ethical.png" alt="Ethical Logo" class="h-20 mx-auto mb-2" />
+      </a>
+      <h2 class="text-xl font-semibold text-[#001D4B]">Secure Client Login</h2>
+    </div>
+
+    <!-- Display Django messages -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 p-3 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Username</label>
+        <input 
+          type="text" 
+          name="username" 
+          class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" 
+          required 
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Password</label>
+        <input 
+          type="password" 
+          name="password" 
+          class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" 
+          required 
+        />
+      </div>
+      <button 
+        type="submit" 
+        class="w-full bg-[#001D4B] text-white py-2 rounded-lg hover:bg-blue-900 transition"
+      >
+        Log In
+      </button>
+    </form>
+
+    <div class="text-center mt-4">
+      <button 
+        id="forgotPasswordBtn" 
+        class="text-sm text-blue-600 hover:underline"
+      >
+        Forgot Password?
+      </button>
+    </div>
+
+    <div class="text-center mt-6">
+      <p class="text-sm text-gray-600">Don't have an account?</p>
+      <a href="{% url 'signup' %}" class="text-blue-600 hover:underline">Open an account</a>
+    </div>
+
+    <div class="text-center mt-6 text-xs text-gray-500">
+      <a href="#" class="mr-4 hover:underline">Security Statement</a>
+      <a href="#" class="mr-4 hover:underline">Privacy Notice</a>
+      <a href="#" class="hover:underline">Privacy Policy</a>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-8 mx-4">
+      <div class="text-center mb-6">
+        <h3 class="text-xl font-semibold text-[#001D4B]">Reset Password</h3>
+        <p class="text-sm text-gray-600 mt-2">Enter your email address and we'll send you a link to reset your password.</p>
+      </div>
+
+      <form id="forgotPasswordForm" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email Address</label>
+          <input 
+            type="email" 
+            id="resetEmail" 
+            name="email" 
+            class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" 
+            required 
+          />
+        </div>
+        <button 
+          type="submit" 
+          class="w-full bg-[#001D4B] text-white py-2 rounded-lg hover:bg-blue-900 transition"
+        >
+          Send Reset Link
+        </button>
+      </form>
+
+      <div class="text-center mt-6">
+        <button 
+          id="backToLogin" 
+          class="text-sm text-blue-600 hover:underline"
+        >
+          Back to Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-8 mx-4">
+      <div class="text-center">
+        <div class="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-[#001D4B] mb-2">Email Sent!</h3>
+        <p class="text-sm text-gray-600 mb-6">We've sent a password reset link to your email address. Please check your inbox and follow the instructions.</p>
+        <button 
+          id="closeSuccessModal" 
+          class="w-full bg-[#001D4B] text-white py-2 rounded-lg hover:bg-blue-900 transition"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Modal functionality
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const backToLogin = document.getElementById('backToLogin');
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    const successModal = document.getElementById('successModal');
+    const closeSuccessModal = document.getElementById('closeSuccessModal');
+
+    // Show forgot password modal
+    forgotPasswordBtn.addEventListener('click', () => {
+      forgotPasswordModal.classList.remove('hidden');
+    });
+
+    // Hide forgot password modal
+    backToLogin.addEventListener('click', () => {
+      forgotPasswordModal.classList.add('hidden');
+      document.getElementById('resetEmail').value = '';
+    });
+
+    // Close modal when clicking outside
+    forgotPasswordModal.addEventListener('click', (e) => {
+      if (e.target === forgotPasswordModal) {
+        forgotPasswordModal.classList.add('hidden');
+        document.getElementById('resetEmail').value = '';
+      }
+    });
+
+    // Handle forgot password form submission
+    forgotPasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('resetEmail').value;
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      
+      try {
+        const response = await fetch('/forgot-password/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+          },
+          body: `email=${encodeURIComponent(email)}`
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          // Hide forgot password modal
+          forgotPasswordModal.classList.add('hidden');
+          // Show success modal
+          successModal.classList.remove('hidden');
+          // Clear form
+          document.getElementById('resetEmail').value = '';
+        } else {
+          // Show error message
+          alert(data.error || 'Error sending reset email. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error sending reset email. Please try again.');
+      }
+    });
+
+    // Close success modal
+    closeSuccessModal.addEventListener('click', () => {
+      successModal.classList.add('hidden');
+    });
+
+    // Close success modal when clicking outside
+    successModal.addEventListener('click', (e) => {
+      if (e.target === successModal) {
+        successModal.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

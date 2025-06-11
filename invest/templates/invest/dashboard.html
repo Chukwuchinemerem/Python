@@ -1,0 +1,338 @@
+{% extends 'invest/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Investment Platform{% endblock %}
+
+{% block content %}
+ <div class="content-page">
+        <div class="content">
+            <div class="container-fluid py-4">
+                <!-- Welcome Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card bg-gradient-primary text-white">
+                            <div class="card-body p-4">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h2 class="mb-2">Welcome back, {{ user.first_name }}!</h2>
+                                        <p class="mb-0 opacity-8">Track your investments and manage your portfolio</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="text-white-50">
+                                            <small>Last login: {{ user.last_login|date:"M d, Y H:i" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Total Balance</h6>
+                                        <h3 class="mb-0 text-success">${{ user.current_balance|floatformat:2 }}</h3>
+                                    </div>
+                                    <div class="icon-shape bg-success bg-opacity-10 rounded-circle">
+                                        <i class="fas fa-wallet text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Total Deposited</h6>
+                                        <h3 class="mb-0 text-primary">${{ user.current_total_deposited|floatformat:2 }}</h3>
+                                    </div>
+                                    <div class="icon-shape bg-primary bg-opacity-10 rounded-circle">
+                                        <i class="fas fa-arrow-down text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Total Withdrawn</h6>
+                                        <h3 class="mb-0 text-danger">${{ user.current_total_withdrawn|floatformat:2 }}</h3>
+                                    </div>
+                                    <div class="icon-shape bg-danger bg-opacity-10 rounded-circle">
+                                        <i class="fas fa-arrow-up text-danger"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Total Profit</h6>
+                                        <h3 class="mb-0 text-warning">${{ user.current_total_profit|floatformat:2 }}</h3>
+                                    </div>
+                                    <div class="icon-shape bg-warning bg-opacity-10 rounded-circle">
+                                        <i class="fas fa-chart-line text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Quick Actions -->
+                    <div class="col-lg-8 mb-4">
+                        <!-- Crypto Prices -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Live Cryptocurrency Prices</h5>
+                                <small class="text-muted">Updated live</small>
+                            </div>
+                            <div class="card-body">
+                                {% if crypto_prices %}
+                                    <div class="row">
+                                        {% for price in crypto_prices %}
+                                        <div class="col-md-6 col-lg-3 mb-3">
+                                            <div class="crypto-card p-3 border rounded">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <div class="crypto-icon me-2">
+                                                        {% if price.cryptocurrency.symbol == 'BTC' %}
+                                                            <i class="fab fa-bitcoin text-warning fs-4"></i>
+                                                        {% elif price.cryptocurrency.symbol == 'ETH' %}
+                                                            <i class="fab fa-ethereum text-primary fs-4"></i>
+                                                        {% elif price.cryptocurrency.symbol == 'SOL' %}
+                                                            <i class="fas fa-sun text-info fs-4"></i>
+                                                        {% elif price.cryptocurrency.symbol == 'TON' %}
+                                                            <i class="fas fa-gem text-secondary fs-4"></i>
+                                                        {% else %}
+                                                            <i class="fas fa-coins text-secondary fs-4"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0">{{ price.cryptocurrency.symbol }}</h6>
+                                                        <small class="text-muted">{{ price.cryptocurrency.name }}</small>
+                                                    </div>
+                                                </div>
+                                                <div class="price-info">
+                                                    <h5 class="mb-1">${{ price.price_usd|floatformat:2 }}</h5>
+                                                    <small class="{% if price.change_24h >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                                        {% if price.change_24h >= 0 %}+{% endif %}{{ price.change_24h|floatformat:2 }}%
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-chart-line fs-1 text-muted mb-3"></i>
+                                        <p class="text-muted">Loading crypto prices...</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Recent Transactions -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Transactions</h5>
+                                <a href="{% url 'history' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_transactions %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Amount</th>
+                                                    <th>Cryptocurrency</th>
+                                                    <th>Status</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for transaction in recent_transactions %}
+                                                <tr>
+                                                    <td>
+                                                        <span class="badge 
+                                                            {% if transaction.transaction_type == 'DEPOSIT' %}bg-success
+                                                            {% elif transaction.transaction_type == 'WITHDRAWAL' %}bg-danger
+                                                            {% elif transaction.transaction_type == 'PROFIT' %}bg-warning
+                                                            {% else %}bg-info{% endif %}">
+                                                            {{ transaction.get_transaction_type_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>${{ transaction.amount|floatformat:2 }}</td>
+                                                    <td>
+                                                        {% if transaction.cryptocurrency %}
+                                                            {{ transaction.cryptocurrency.symbol }}
+                                                        {% else %}
+                                                            N/A
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge 
+                                                            {% if transaction.status == 'APPROVED' %}bg-success
+                                                            {% elif transaction.status == 'REJECTED' %}bg-danger
+                                                            {% elif transaction.status == 'PENDING' %}bg-warning
+                                                            {% else %}bg-info{% endif %}">
+                                                            {{ transaction.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-history fs-1 text-muted mb-3"></i>
+                                        <p class="text-muted">No recent transactions found</p>
+                                        <a href="{% url 'deposit' %}" class="btn btn-primary">Make Your First Deposit</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="col-lg-4">
+                        <!-- Quick Actions -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'deposit' %}" class="btn btn-success">
+                                        <i class="fas fa-plus me-2"></i>Make Deposit
+                                    </a>
+                                    <a href="{% url 'withdraw' %}" class="btn btn-warning">
+                                        <i class="fas fa-minus me-2"></i>Withdraw Funds
+                                    </a>
+                                    <a href="{% url 'history' %}" class="btn btn-info">
+                                        <i class="fas fa-history me-2"></i>View History
+                                    </a>
+                                    <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-user me-2"></i>Update Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Investment Tiers Info -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Investment Tiers</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="tier-info">
+                                    <div class="tier-item mb-3 p-3 border rounded">
+                                        <h6 class="text-primary mb-1">Royal Tier</h6>
+                                        <p class="small text-muted mb-2">Premium investment package</p>
+                                        <div class="d-flex justify-content-between">
+                                            <small>ROI: 20%</small>
+                                            <small>Duration: 24hrs</small>
+                                        </div>
+                                    </div>
+                                    <div class="tier-item mb-3 p-3 border rounded">
+                                        <h6 class="text-success mb-1">Elite Tier</h6>
+                                        <p class="small text-muted mb-2">Advanced investment package</p>
+                                        <div class="d-flex justify-content-between">
+                                            <small>ROI: 15%</small>
+                                            <small>Duration: 24hrs</small>
+                                        </div>
+                                    </div>
+                                    <div class="tier-item mb-3 p-3 border rounded">
+                                        <h6 class="text-warning mb-1">Executive Tier</h6>
+                                        <p class="small text-muted mb-2">Standard investment package</p>
+                                        <div class="d-flex justify-content-between">
+                                            <small>ROI: 10%</small>
+                                            <small>Duration: 24hrs</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'deposit' %}" class="btn btn-primary btn-sm">Start Investing</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom CSS -->
+            <style>
+            .icon-shape {
+                width: 48px;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .crypto-card {
+                transition: transform 0.2s;
+            }
+
+            .crypto-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+
+            .tier-item {
+                transition: all 0.2s;
+            }
+
+            .tier-item:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .bg-gradient-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            </style>
+
+            <!-- Auto-refresh crypto prices -->
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Auto-refresh crypto prices every 2 minutes
+                setInterval(function() {
+                    fetch(window.location.href)
+                        .then(response => response.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newPrices = doc.querySelector('.card-body .row');
+                            if (newPrices) {
+                                document.querySelector('.card-body .row').innerHTML = newPrices.innerHTML;
+                            }
+                        })
+                        .catch(console.error);
+                }, 120000); // 2 minutes
+            });
+            </script>
+        </div>
+        <!-- container -->
+
+    </div>
+{% endblock %}

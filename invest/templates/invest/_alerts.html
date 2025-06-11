@@ -1,0 +1,28 @@
+<!-- Display messages -->
+<style>
+    .alert-container {
+      position: fixed;
+      width: 100%;  
+      top: 50px;
+      right: 20px;
+      z-index: 999999;
+      max-width: 500px;
+    }
+    .alert-container > .alert { 
+      width: 100% !important;
+    }
+</style>
+  
+
+
+<div class="alert-container mb-30">
+
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% elif message.tags == 'info' %}info{% else %}primary{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+</div>

@@ -1,0 +1,324 @@
+{% extends 'invest/base.html' %}
+{% load static %}
+
+{% block title %}Make Deposit - Investment Platform{% endblock %}
+
+{% block content %}
+<div class="content-page">
+    <div class="content">
+        <div class="container-fluid py-4">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-gradient-primary text-white">
+                        <div class="card-body p-4 text-center">
+                            <h2 class="mb-2">Make a Deposit</h2>
+                            <p class="mb-0 opacity-8">Choose your investment tier and start earning</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="row">
+                <!-- Investment Tiers -->
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Investment Tiers</h5>
+                            <small class="text-muted">Select a tier based on your investment amount</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="tierSelection">
+                                {% for tier in investment_tiers %}
+                                <div class="col-lg-4 mb-3">
+                                    <div class="tier-card h-100" data-min="{{ tier.min_investment }}" data-max="{% if tier.max_investment %}{{ tier.max_investment }}{% else %}999999999{% endif %}" data-roi="{{ tier.roi_percentage }}" data-name="{{ tier.name }}">
+                                        <input type="radio" class="btn-check" name="investment_tier" id="{{ tier.name|lower }}" value="{{ tier.name|lower }}">
+                                        <label class="btn btn-outline-dark tier-label w-100 h-100" for="{{ tier.name|lower }}">
+                                            <div class="p-4 text-center">
+                                                <div class="tier-badge mb-3">{{ tier.name }}</div>
+                                                <h3 class="tier-roi mb-3">{{ tier.roi_percentage }}% TOTAL ROI</h3>
+                                                <div class="tier-details text-start">
+                                                    <p class="mb-2"><strong>Duration:</strong> {{ tier.duration_hours }} hours</p>
+                                                    <p class="mb-2"><strong>Min Amount:</strong> ${{ tier.min_investment|floatformat:0 }}</p>
+                                                    {% if tier.max_investment %}
+                                                    <p class="mb-2"><strong>Max Amount:</strong> ${{ tier.max_investment|floatformat:0 }}</p>
+                                                    {% else %}
+                                                    <p class="mb-2"><strong>Max Amount:</strong> Unlimited</p>
+                                                    {% endif %}
+                                                    <p class="mb-2"><strong>Referral Bonus:</strong> {{ tier.referral_bonus }}%</p>
+                                                    <p class="mb-0 text-success">{{ tier.incentive_description }}</p>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposit Form -->
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Deposit Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" id="depositForm">
+                                {% csrf_token %}
+                                <input type="hidden" name="selected_tier" id="selectedTier">
+
+                                <!-- Amount Input -->
+                                <div class="mb-4">
+                                    <label for="amount" class="form-label fw-bold">Investment Amount</label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" name="amount" id="amount" 
+                                               min="100" step="0.01" placeholder="Enter amount" required>
+                                    </div>
+                                    <div class="form-text" id="amountFeedback"></div>
+                                </div>
+
+                                <!-- Cryptocurrency Selection -->
+                                <div class="mb-4">
+                                    <label for="cryptocurrency" class="form-label fw-bold">Payment Method</label>
+                                    <select class="form-select form-select-lg" name="cryptocurrency" id="cryptocurrency" required>
+                                        <option value="">Select Cryptocurrency</option>
+                                        {% for crypto in cryptocurrencies %}
+                                            <option value="{{ crypto.id }}" data-address="{{ crypto.wallet_address }}" data-name="{{ crypto.name }}" data-symbol="{{ crypto.symbol }}">{{ crypto.name }} ({{ crypto.symbol }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Wallet Address -->
+                                <div class="mb-4" id="walletSection" style="display: none;">
+                                    <label class="form-label fw-bold">Payment Address</label>
+                                    <div class="wallet-display p-3 bg-light rounded border">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="mb-1 fw-bold">Send <span id="cryptoName"></span> to:</p>
+                                                <code id="walletAddress" class="text-break"></code>
+                                            </div>
+                                            <button type="button" class="btn btn-primary btn-sm ms-2" onclick="copyAddress()">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="alert alert-warning mt-3 mb-0 small">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Send only <span id="cryptoSymbol"></span> to this address.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Transaction ID -->
+                                <div class="mb-4">
+                                    <label for="transaction_id" class="form-label fw-bold">Transaction Hash</label>
+                                    <input type="text" class="form-control form-control-lg" name="transaction_id" 
+                                           id="transaction_id" placeholder="Enter transaction ID after payment" required>
+                                    <div class="form-text">Enter the transaction hash from your crypto wallet after sending payment</div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                        <i class="fas fa-paper-plane me-2"></i>Submit Deposit Request
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions Sidebar -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>How to Deposit</h6>
+                        </div>
+                        <div class="card-body">
+                            <ol class="list-unstyled">
+                                <li class="mb-2"><span class="badge bg-primary me-2">1</span>Choose investment tier</li>
+                                <li class="mb-2"><span class="badge bg-primary me-2">2</span>Enter deposit amount</li>
+                                <li class="mb-2"><span class="badge bg-primary me-2">3</span>Select cryptocurrency</li>
+                                <li class="mb-2"><span class="badge bg-primary me-2">4</span>Send payment to address</li>
+                                <li class="mb-2"><span class="badge bg-primary me-2">5</span>Enter transaction hash</li>
+                                <li class="mb-0"><span class="badge bg-primary me-2">6</span>Submit & wait for approval</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Selected Tier Display -->
+                    <div class="card mt-3" id="selectedTierCard" style="display: none;">
+                        <div class="card-header">
+                            <h6 class="mb-0">Selected Tier</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="tierSummary"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.tier-card { height: 100%; transition: transform 0.2s; }
+.tier-card:hover { transform: translateY(-2px); }
+.tier-label { height: 100%; min-height: 300px; border: 2px solid #dee2e6; transition: all 0.3s; }
+.tier-label:hover { border-color: #007bff; box-shadow: 0 4px 12px rgba(0,123,255,0.15); }
+.btn-check:checked + .tier-label { background-color: #212529; border-color: #212529; color: white; }
+.tier-badge { font-size: 1.2rem; font-weight: bold; padding: 8px 16px; border: 2px solid currentColor; border-radius: 4px; }
+.tier-roi { font-size: 1.4rem; font-weight: bold; color: #28a745; }
+.btn-check:checked + .tier-label .tier-roi { color: #ffc107; }
+.wallet-display { border: 2px dashed #dee2e6 !important; }
+#amountFeedback.text-success { color: #28a745 !important; }
+#amountFeedback.text-danger { color: #dc3545 !important; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    const tierInputs = document.querySelectorAll('input[name="investment_tier"]');
+    const cryptoSelect = document.getElementById('cryptocurrency');
+    const walletSection = document.getElementById('walletSection');
+    const selectedTierInput = document.getElementById('selectedTier');
+    const selectedTierCard = document.getElementById('selectedTierCard');
+    const tierSummary = document.getElementById('tierSummary');
+    const amountFeedback = document.getElementById('amountFeedback');
+
+    // Auto-select tier based on amount
+    amountInput.addEventListener('input', function() {
+        const amount = parseFloat(this.value) || 0;
+        const tierCards = document.querySelectorAll('.tier-card');
+        
+        // Clear all selections
+        tierInputs.forEach(input => input.checked = false);
+        
+        // Find matching tier
+        for (let card of tierCards) {
+            const min = parseFloat(card.dataset.min);
+            const max = parseFloat(card.dataset.max);
+            
+            if (amount >= min && amount <= max) {
+                const tierInput = card.querySelector('input[type="radio"]');
+                tierInput.checked = true;
+                updateTierDisplay();
+                amountFeedback.textContent = `✓ ${card.dataset.name} tier selected`;
+                amountFeedback.className = 'form-text text-success';
+                break;
+            }
+        }
+        
+        if (!document.querySelector('input[name="investment_tier"]:checked') && amount > 0) {
+            amountFeedback.textContent = 'Amount doesn\'t match any tier range';
+            amountFeedback.className = 'form-text text-danger';
+            selectedTierCard.style.display = 'none';
+        }
+    });
+
+    // Update display when tier is manually selected
+    tierInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            updateTierDisplay();
+            validateAmount();
+        });
+    });
+
+    // Show wallet address when crypto is selected
+    cryptoSelect.addEventListener('change', function() {
+        if (this.value) {
+            const selectedOption = this.options[this.selectedIndex];
+            const address = selectedOption.dataset.address;
+            const name = selectedOption.dataset.name;
+            const symbol = selectedOption.dataset.symbol;
+            
+            if (address) {
+                document.getElementById('walletAddress').textContent = address;
+                document.getElementById('cryptoName').textContent = name;
+                document.getElementById('cryptoSymbol').textContent = symbol;
+                walletSection.style.display = 'block';
+            } else {
+                alert('Wallet address not configured for this cryptocurrency');
+                walletSection.style.display = 'none';
+            }
+        } else {
+            walletSection.style.display = 'none';
+        }
+    });
+
+    function updateTierDisplay() {
+        const selectedTier = document.querySelector('input[name="investment_tier"]:checked');
+        if (selectedTier) {
+            const card = selectedTier.closest('.tier-card');
+            selectedTierInput.value = selectedTier.value;
+            
+            const maxAmount = card.dataset.max == '999999999' ? 'Unlimited' : '$' + parseInt(card.dataset.max).toLocaleString();
+            
+            tierSummary.innerHTML = `
+                <h6 class="text-primary">${card.dataset.name} Tier</h6>
+                <p class="mb-1"><strong>ROI:</strong> ${card.dataset.roi}%</p>
+                <p class="mb-1"><strong>Duration:</strong> 24 hours</p>
+                <p class="mb-0"><strong>Range:</strong> $${parseInt(card.dataset.min).toLocaleString()} - ${maxAmount}</p>
+            `;
+            selectedTierCard.style.display = 'block';
+        } else {
+            selectedTierCard.style.display = 'none';
+        }
+    }
+
+    function validateAmount() {
+        const selectedTier = document.querySelector('input[name="investment_tier"]:checked');
+        if (!selectedTier) return;
+        
+        const card = selectedTier.closest('.tier-card');
+        const min = parseFloat(card.dataset.min);
+        const max = parseFloat(card.dataset.max);
+        const amount = parseFloat(amountInput.value) || 0;
+
+        if (amount < min || amount > max) {
+            const maxDisplay = max == 999999999 ? 'Unlimited' : '$' + max.toLocaleString();
+            amountFeedback.textContent = `Amount must be between $${min.toLocaleString()} - ${maxDisplay}`;
+            amountFeedback.className = 'form-text text-danger';
+        } else {
+            amountFeedback.textContent = `✓ Valid amount for ${card.dataset.name} tier`;
+            amountFeedback.className = 'form-text text-success';
+        }
+    }
+});
+
+function copyAddress() {
+    const address = document.getElementById('walletAddress').textContent;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(address).then(function() {
+            const btn = event.target.closest('button');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.replace('btn-primary', 'btn-success');
+            setTimeout(function() {
+                btn.innerHTML = original;
+                btn.classList.replace('btn-success', 'btn-primary');
+            }, 2000);
+        }).catch(function() {
+            // Fallback for older browsers
+            alert('Address: ' + address);
+        });
+    } else {
+        // Fallback for browsers without clipboard API
+        alert('Address: ' + address);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,621 @@
+{% extends 'invest/base.html' %}
+{% load static %}
+
+{% block title %}Profile - Investment Platform{% endblock %}
+
+{% block content %}
+<div class="content-page">
+    <div class="content">
+        <div class="container-fluid py-4">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">My Profile</h2>
+                            <p class="text-muted mb-0">Manage your account information and settings</p>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-primary" id="editProfileBtn">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="row">
+                <!-- Profile Information Card -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <!-- Profile Picture Section -->
+                            <div class="profile-picture-container mb-4">
+                                <div class="profile-picture-wrapper">
+                                    <img src="{% static 'admins/images/img_man_wearing_vr.png' %}" alt="Profile Picture" class="profile-picture">
+                                </div>
+                            </div>
+
+                            <!-- User Basic Info -->
+                            <h4 class="mb-2">{{ user.first_name }} {{ user.last_name }}</h4>
+                            <p class="text-muted mb-3">@{{ user.username }}</p>
+                            
+                            <!-- Account Stats -->
+                            <div class="row text-center mb-4">
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h5 class="text-success mb-1">${{ user.balance|floatformat:2 }}</h5>
+                                        <small class="text-muted">Balance</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h5 class="text-primary mb-1">${{ user.total_deposited|floatformat:2 }}</h5>
+                                        <small class="text-muted">Deposited</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h5 class="text-warning mb-1">${{ user.total_profit|floatformat:2 }}</h5>
+                                        <small class="text-muted">Profit</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Verification Status -->
+                            <div class="verification-status mb-3">
+                                {% if user.is_verified %}
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check-circle me-1"></i>Verified Account
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning fs-6">
+                                        <i class="fas fa-exclamation-circle me-1"></i>Unverified Account
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Member Since -->
+                            <div class="member-since">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Member since {{ user.date_joined|date:"F Y" }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Details & Edit Form -->
+                <div class="col-lg-8">
+                    <!-- View Mode -->
+                    <div class="card mb-4" id="profileViewMode">
+                        <div class="card-header">
+                            <h5 class="mb-0">Personal Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">First Name</label>
+                                    <p class="mb-0 fw-medium">{{ user.first_name|default:"Not provided" }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Last Name</label>
+                                    <p class="mb-0 fw-medium">{{ user.last_name|default:"Not provided" }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Username</label>
+                                    <p class="mb-0 fw-medium">{{ user.username }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Email Address</label>
+                                    <p class="mb-0 fw-medium">{{ user.email }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Phone Number</label>
+                                    <p class="mb-0 fw-medium">{{ user.phone|default:"Not provided" }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Country</label>
+                                    <p class="mb-0 fw-medium">{{ user.country|default:"Not provided" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div class="card mb-4" id="profileEditMode" style="display: none;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Edit Personal Information</h5>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelEditBtn">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data" id="profileUpdateForm">
+                                {% csrf_token %}
+                                <input type="hidden" name="profile_picture" id="hiddenProfilePicture">
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="country" class="form-label">Country</label>
+                                        <select class="form-select" id="country" name="country">
+                                            <option value="">Select Country</option>
+                                            <option value="Nigeria" {% if user.country == 'Nigeria' %}selected{% endif %}>Nigeria</option>
+                                            <option value="United States" {% if user.country == 'United States' %}selected{% endif %}>United States</option>
+                                            <option value="United Kingdom" {% if user.country == 'United Kingdom' %}selected{% endif %}>United Kingdom</option>
+                                            <option value="Canada" {% if user.country == 'Canada' %}selected{% endif %}>Canada</option>
+                                            <option value="Australia" {% if user.country == 'Australia' %}selected{% endif %}>Australia</option>
+                                            <option value="Germany" {% if user.country == 'Germany' %}selected{% endif %}>Germany</option>
+                                            <option value="France" {% if user.country == 'France' %}selected{% endif %}>France</option>
+                                            <option value="South Africa" {% if user.country == 'South Africa' %}selected{% endif %}>South Africa</option>
+                                            <option value="Ghana" {% if user.country == 'Ghana' %}selected{% endif %}>Ghana</option>
+                                            <option value="Kenya" {% if user.country == 'Kenya' %}selected{% endif %}>Kenya</option>
+                                            <option value="Other" {% if user.country and user.country not in 'Nigeria,United States,United Kingdom,Canada,Australia,Germany,France,South Africa,Ghana,Kenya' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2 mt-4">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-2"></i>Save Changes
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" id="cancelEditBtn2">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Account Security -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Account Security</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Last Login</label>
+                                    <p class="mb-0 fw-medium">
+                                        {% if user.last_login %}
+                                            {{ user.last_login|date:"M d, Y H:i" }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Date Joined</label>
+                                    <p class="mb-0 fw-medium">{{ user.date_joined|date:"M d, Y H:i" }}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Referral Information -->
+                    {% if user.referral_code %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Referral Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label text-muted">Your Referral Code</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="{{ user.referral_code }}" readonly id="referralCode">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyReferralCode()">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Share this code with friends to earn referral bonuses</small>
+                                </div>
+                                {% if user.referred_by %}
+                                <div class="col-md-12">
+                                    <label class="form-label text-muted">Referred By</label>
+                                    <p class="mb-0 fw-medium">{{ user.referred_by.username }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                        <div class="form-text">Password must be at least 8 characters long</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning" id="changePasswordBtn">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.profile-picture-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-picture-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+.profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #e9ecef;
+}
+
+.profile-picture-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    border: 4px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-picture-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.stat-item {
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.verification-status .badge {
+    padding: 8px 16px;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.fw-medium {
+    font-weight: 500;
+}
+
+.profile-picture-wrapper:hover .profile-picture-overlay {
+    display: flex !important;
+}
+
+/* Custom Alert Styles */
+.alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 8px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+</style>
+
+<!-- JavaScript -->
+<script>
+// Get CSRF token
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+// Simple alert function
+function showAlert(message, type = 'success') {
+    // Remove any existing alerts
+    const existingAlerts = document.querySelectorAll('.custom-alert');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    // Create new alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} custom-alert`;
+    alertDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+            <span>${message}</span>
+            <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const cancelEditBtn2 = document.getElementById('cancelEditBtn2');
+    const profileViewMode = document.getElementById('profileViewMode');
+    const profileEditMode = document.getElementById('profileEditMode');
+    const profilePictureInput = document.getElementById('profilePictureInput');
+    const profileImageOverlay = document.getElementById('profileImageOverlay');
+    const profileImage = document.getElementById('profileImage');
+
+    // Toggle edit mode
+    editProfileBtn.addEventListener('click', function() {
+        profileViewMode.style.display = 'none';
+        profileEditMode.style.display = 'block';
+        editProfileBtn.style.display = 'none';
+    });
+
+    // Cancel edit mode
+    function cancelEdit() {
+        profileViewMode.style.display = 'block';
+        profileEditMode.style.display = 'none';
+        editProfileBtn.style.display = 'block';
+    }
+
+    cancelEditBtn.addEventListener('click', cancelEdit);
+    cancelEditBtn2.addEventListener('click', cancelEdit);
+
+    // Profile picture upload
+    if (document.querySelector('.profile-picture-wrapper')) {
+        document.querySelector('.profile-picture-wrapper').addEventListener('click', function() {
+            if (profileEditMode.style.display !== 'none') {
+                profilePictureInput.click();
+            }
+        });
+    }
+
+    if (profilePictureInput) {
+        profilePictureInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (profileImage.tagName === 'IMG') {
+                        profileImage.src = e.target.result;
+                    } else {
+                        // Replace placeholder with image
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'profile-picture';
+                        img.id = 'profileImage';
+                        profileImage.parentNode.replaceChild(img, profileImage);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Handle profile form submission
+    document.getElementById('profileUpdateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        // Add profile picture if selected
+        if (profilePictureInput && profilePictureInput.files[0]) {
+            formData.append('profile_picture', profilePictureInput.files[0]);
+        }
+
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        submitBtn.disabled = true;
+
+        // Submit form
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Profile updated successfully!', 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(data.message || 'Failed to update profile. Please try again.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while updating your profile. Please try again.', 'error');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+
+    // Handle password change
+    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Client-side validation
+        if (newPassword !== confirmPassword) {
+            showAlert('New passwords do not match!', 'error');
+            return;
+        }
+        
+        if (newPassword.length < 8) {
+            showAlert('Password must be at least 8 characters long!', 'error');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('changePasswordBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Changing...';
+        submitBtn.disabled = true;
+        
+        // Prepare data for AJAX request
+        const passwordData = {
+            current_password: currentPassword,
+            new_password: newPassword,
+            confirm_password: confirmPassword
+        };
+        
+        // Send AJAX request
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify(passwordData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Password changed successfully!', 'success');
+                // Reset form after successful change
+                this.reset();
+                // Close modal after 2 seconds
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                    modal.hide();
+                }, 2000);
+            } else {
+                showAlert(data.message || 'Failed to change password. Please try again.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while changing password. Please try again.', 'error');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+});
+
+// Copy referral code function
+function copyReferralCode() {
+    const referralCode = document.getElementById('referralCode');
+    referralCode.select();
+    referralCode.setSelectionRange(0, 99999); // For mobile devices
+    
+    navigator.clipboard.writeText(referralCode.value).then(function() {
+        showAlert('Referral code copied to clipboard!', 'success');
+        
+        // Show success message on button
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check text-success"></i>';
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+        }, 2000);
+    }).catch(function() {
+        showAlert('Failed to copy referral code. Please copy manually.', 'error');
+    });
+}
+</script>
+
+{% endblock %}

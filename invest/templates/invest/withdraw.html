@@ -1,0 +1,308 @@
+{% extends 'invest/base.html' %}
+{% load static %}
+
+{% block title %}Withdraw Funds - Investment Platform{% endblock %}
+
+{% block content %}
+<div class="content-page">
+    <div class="content">
+        <div class="container-fluid py-4">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-gradient-danger text-white">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h2 class="mb-2">Withdraw Funds</h2>
+                                    <p class="mb-0 opacity-8">Request withdrawal of your available balance</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="balance-info">
+                                        <small class="text-white-50">Available Balance</small>
+                                        <h4 class="mb-0">${{ user_balance|floatformat:2 }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- Withdrawal Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-minus-circle me-2"></i>
+                                Withdrawal Request
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            <form method="post" id="withdrawalForm">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="amount" class="form-label">
+                                            <i class="fas fa-dollar-sign me-1"></i>
+                                            Withdrawal Amount (USD)
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" 
+                                                   class="form-control" 
+                                                   id="amount" 
+                                                   name="amount" 
+                                                   step="0.01" 
+                                                   min="1" 
+                                                   max="{{ user_balance }}"
+                                                   placeholder="Enter amount" 
+                                                   required>
+                                        </div>
+                                        <div class="form-text">
+                                            Available balance: ${{ user_balance|floatformat:2 }}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cryptocurrency" class="form-label">
+                                            <i class="fab fa-bitcoin me-1"></i>
+                                            Cryptocurrency
+                                        </label>
+                                        <select class="form-select" id="cryptocurrency" name="cryptocurrency" required>
+                                            <option value="">Select cryptocurrency</option>
+                                            {% for crypto in cryptocurrencies %}
+                                                <option value="{{ crypto.id }}">
+                                                    {{ crypto.name }} ({{ crypto.symbol }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="wallet_address" class="form-label">
+                                        <i class="fas fa-wallet me-1"></i>
+                                        Your Wallet Address
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="wallet_address" 
+                                           name="wallet_address" 
+                                           placeholder="Enter your wallet address"
+                                           required>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Make sure to enter the correct wallet address for the selected cryptocurrency
+                                    </div>
+                                </div>
+
+                                <!-- Quick Amount Buttons -->
+                                <div class="mb-4">
+                                    <label class="form-label">Quick Select Amount</label>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="50">$50</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="100">$100</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="500">$500</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="1000">$1000</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="maxAmount">Max</button>
+                                    </div>
+                                </div>
+
+                                <!-- Terms and Conditions -->
+                                <div class="mb-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                                Important Notice
+                                            </h6>
+                                            <ul class="mb-0 small">
+                                                <li>Withdrawal requests are processed within 24-48 hours</li>
+                                                <li>A small network fee may be deducted from your withdrawal</li>
+                                                <li>Ensure your wallet address is correct - transactions cannot be reversed</li>
+                                                <li>Minimum withdrawal amount is $10</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="confirmWithdrawal" required>
+                                        <label class="form-check-label" for="confirmWithdrawal">
+                                            I confirm that the wallet address is correct and I understand the withdrawal terms
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-danger" id="submitBtn" disabled>
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        Submit Withdrawal Request
+                                    </button>
+                                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>
+                                        Back to Dashboard
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar with Info -->
+                <div class="col-lg-4">
+                    <!-- Withdrawal Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Withdrawal Information
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-item mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Processing Time:</span>
+                                    <span>24-48 hours</span>
+                                </div>
+                            </div>
+                            <div class="info-item mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Minimum Amount:</span>
+                                    <span>$10.00</span>
+                                </div>
+                            </div>
+                            <div class="info-item mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Network Fee:</span>
+                                    <span>Variable</span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Status:</span>
+                                    <span class="badge bg-info">Pending Review</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Withdrawals -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-history me-2"></i>
+                                Recent Withdrawals
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center py-3">
+                                <i class="fas fa-chart-line fs-1 text-muted mb-2"></i>
+                                <p class="text-muted small">Your recent withdrawals will appear here</p>
+                                <a href="{% url 'history' %}" class="btn btn-sm btn-outline-primary">View All History</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.quick-amount:hover {
+    transform: translateY(-1px);
+}
+
+.info-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+#submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    const confirmCheckbox = document.getElementById('confirmWithdrawal');
+    const submitBtn = document.getElementById('submitBtn');
+    const quickAmountButtons = document.querySelectorAll('.quick-amount');
+    const maxAmountBtn = document.getElementById('maxAmount');
+    const userBalance = {{ user_balance }};
+
+    // Quick amount selection
+    quickAmountButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const amount = this.dataset.amount;
+            if (parseFloat(amount) <= userBalance) {
+                amountInput.value = amount;
+                validateForm();
+            }
+        });
+    });
+
+    // Max amount selection
+    maxAmountBtn.addEventListener('click', function() {
+        amountInput.value = userBalance.toFixed(2);
+        validateForm();
+    });
+
+    // Form validation
+    function validateForm() {
+        const amount = parseFloat(amountInput.value) || 0;
+        const isValidAmount = amount >= 10 && amount <= userBalance;
+        const isConfirmed = confirmCheckbox.checked;
+        
+        submitBtn.disabled = !(isValidAmount && isConfirmed);
+    }
+
+    // Event listeners
+    amountInput.addEventListener('input', validateForm);
+    confirmCheckbox.addEventListener('change', validateForm);
+
+    // Amount validation
+    amountInput.addEventListener('blur', function() {
+        const amount = parseFloat(this.value) || 0;
+        if (amount < 10) {
+            this.classList.add('is-invalid');
+        } else if (amount > userBalance) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    // Form submission confirmation
+    document.getElementById('withdrawalForm').addEventListener('submit', function(e) {
+        const amount = parseFloat(amountInput.value);
+        if (!confirm(`Are you sure you want to withdraw $${amount.toFixed(2)}? This action cannot be undone.`)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investment Offers</title>
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .title-box {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+
+    .sub-title {
+      font-size: 1.2rem;
+      color: #6c757d;
+    }
+
+    .price-box {
+      background-color: black;
+      color: white;
+      padding: 2rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .price-cost {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .price-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .price-text p {
+      margin-bottom: 0.5rem;
+    }
+
+    .pill-button-01 {
+      display: inline-block;
+      padding: 0.5rem 1.25rem;
+      color: white;
+      background-color: #007bff;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .pill-button-01:hover {
+      background-color: #0056b3;
+    }
+
+    section.price-01 {
+      padding-top: 3rem;
+      padding-bottom: 5rem;
+    }
+  </style>
+</head>
+<body>
+
+<section class="price-01">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="title-box">
+          <h2 class="main-title">Investment Offers</h2>
+          <p class="sub-title">Here comes a path to break forth into the millionaire benefactors league!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Basic Plan -->
+      <div class="col-md-6 col-lg-4">
+        <div class="price-box">
+          <div class="price-cost">BASIC PLAN</div>
+          <h3 class="price-title">10% TOTAL RIO</h3>
+          <div class="price-text">
+            <p><strong>Investment Range:</strong> $100 - $2999</p>
+            <p><strong>Returns:</strong> 10% Every 5 Days</p>
+            <p><strong>Profit Duration:</strong> Every 5 Days</p>
+            <p><strong>Capital Will Be Back:</strong> Yes</p>
+            <p><strong>Total Return:</strong> 10% + Capital</p>
+            <p>24/7 Hours Support</p>
+          </div>
+          <div class="price-button">
+            <a class="pill-button-01 mt-3" href="{% url 'signup' %}">Get Started</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Standard Plan -->
+      <div class="col-md-6 col-lg-4">
+        <div class="price-box">
+          <div class="price-cost">STANDARD PLAN</div>
+          <h3 class="price-title">15% TOTAL RIO</h3>
+          <div class="price-text">
+            <p><strong>Investment Range:</strong> $3000 - $14999</p>
+            <p><strong>Returns:</strong> 15% Every 5 Days</p>
+            <p><strong>Profit Duration:</strong> Every 5 Days</p>
+            <p><strong>Capital Will Be Back:</strong> Yes</p>
+            <p><strong>Total Return:</strong> 15% + Capital</p>
+          </div>
+          <div class="price-button">
+            <a class="pill-button-01 mt-3" href="{% url 'signup' %}">Get Started</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Professional Plan -->
+      <div class="col-md-6 col-lg-4">
+        <div class="price-box">
+          <div class="price-cost">PROFESSIONAL PLAN</div>
+          <h3 class="price-title">25% TOTAL RIO</h3>
+          <div class="price-text">
+            <p><strong>Investment Range:</strong> $15000 - $49999</p>
+            <p><strong>Returns:</strong> 25% Every 7 Days</p>
+            <p><strong>Profit Duration:</strong> Every 7 Days</p>
+            <p><strong>Capital Will Be Back:</strong> Yes</p>
+            <p><strong>Total Return:</strong> 25% + Capital</p>
+          </div>
+          <div class="price-button">
+            <a class="pill-button-01 mt-3" href="{% url 'signup' %}">Get Started</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Plan -->
+      <div class="col-md-6 col-lg-4 mx-auto">
+        <div class="price-box">
+          <div class="price-cost">ADVANCED PLAN</div>
+          <h3 class="price-title">50% TOTAL RIO</h3>
+          <div class="price-text">
+            <p><strong>Investment Range:</strong> $50000 - $100000000</p>
+            <p><strong>Returns:</strong> 50% Every 7 Days</p>
+            <p><strong>Profit Duration:</strong> Every 7 Days</p>
+            <p><strong>Capital Will Be Back:</strong> Yes</p>
+            <p><strong>Total Return:</strong> 50% + Capital</p>
+          </div>
+          <div class="price-button">
+            <a class="pill-button-01 mt-3" href="{% url 'signup' %}">Get Started</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,198 @@
+{% extends 'admins/base.html' %}
+{% load static %}
+
+
+{% block content %}
+    
+
+    
+<!-- ============================================================== -->
+        <!-- Start Page Content here -->
+        <!-- ============================================================== -->
+
+        <div class="content-page">
+            <div class="content">
+
+                <!-- Start Content-->
+                <div class="container-fluid">
+
+                    <!-- start page title -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="page-title-box">
+                                <div class="page-title-right">
+                                    <ol class="breadcrumb m-0">
+                                        <li class="breadcrumb-item"><a href="javascript: void(0);">Admin</a></li>
+                                        <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboard</a></li>
+                                        <li class="breadcrumb-item active">Overview</li>
+                                    </ol>
+                                </div>
+                                <h4 class="page-title">Admin Dashboard</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end page title -->
+
+                    <!-- Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-xxl-3 col-sm-6">
+                            <div class="card widget-flat text-bg-pink">
+                                <div class="card-body">
+                                    <div class="float-end">
+                                        <i class="ri-time-line widget-icon"></i>
+                                    </div>
+                                    <h6 class="text-uppercase mt-0" title="Pending Deposits">Pending Deposits</h6>
+                                    <h2 class="my-2">{{ pending_deposits }}</h2>
+                                    <a href="{% url 'admin_deposits' %}" class="text-white">View All</a>
+                                </div>
+                            </div>
+                        </div> <!-- end col-->
+                        
+                        <div class="col-xxl-3 col-sm-6">
+                            <div class="card widget-flat text-bg-warning">
+                                <div class="card-body">
+                                    <div class="float-end">
+                                        <i class="ri-wallet-line widget-icon"></i>
+                                    </div>
+                                    <h6 class="text-uppercase mt-0" title="Pending Withdrawals">Pending Withdrawals</h6>
+                                    <h2 class="my-2">{{ pending_withdrawals }}</h2>
+                                    <a href="#" class="text-white">View All</a>
+                                </div>
+                            </div>
+                        </div> <!-- end col-->
+
+                        <div class="col-xxl-3 col-sm-6">
+                            <div class="card widget-flat text-bg-purple">
+                                <div class="card-body">
+                                    <div class="float-end">
+                                        <i class="ri-group-line widget-icon"></i>
+                                    </div>
+                                    <h6 class="text-uppercase mt-0" title="Total Users">Total Users</h6>
+                                    <h2 class="my-2">{{ total_users }}</h2>
+                                    <span class="text-white">Active Users</span>
+                                </div>
+                            </div>
+                        </div> <!-- end col-->
+
+                        <div class="col-xxl-3 col-sm-6">
+                            <div class="card widget-flat text-bg-success">
+                                <div class="card-body">
+                                    <div class="float-end">
+                                        <i class="ri-money-dollar-circle-line widget-icon"></i>
+                                    </div>
+                                    <h6 class="text-uppercase mt-0" title="Today's Deposits">Today's Deposits</h6>
+                                    <h2 class="my-2">${{ total_deposits_today|default:0 }}</h2>
+                                    <span class="text-white">Total Amount</span>
+                                </div>
+                            </div>
+                        </div> <!-- end col-->
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="header-title mb-3">Quick Actions</h4>
+                                    <div class="row">
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'admin_deposits' %}" class="btn btn-primary w-100">
+                                                <i class="ri-upload-line me-1"></i> Manage Deposits
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'admin_investments' %}" class="btn btn-success w-100">
+                                                <i class="ri-line-chart-line me-1"></i> Manage Investments
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'admin_withdrawals' %}" class="btn btn-warning w-100">
+                                                <i class="ri-download-line me-1"></i> Manage Withdrawals
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'admin_users' %}" class="btn btn-secondary w-100">
+                                                <i class="ri-group-line me-1"></i> Manage Users
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'admin_settings' %}" class="btn btn-info w-100">
+                                                <i class="ri-settings-line me-1"></i> Settings
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Deposits -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="header-title">Recent Deposits</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>User</th>
+                                                    <th>Amount</th>
+                                                    <th>Tier</th>
+                                                    <th>Crypto</th>
+                                                    <th>Status</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for deposit in recent_deposits %}
+                                                <tr>
+                                                    <td>{{ deposit.user.username }}</td>
+                                                    <td>${{ deposit.amount }}</td>
+                                                    <td><span class="badge bg-primary">{{ deposit.investment_tier.name }}</span></td>
+                                                    <td>{{ deposit.cryptocurrency.symbol }}</td>
+                                                    <td>
+                                                        {% if deposit.status == 'PENDING' %}
+                                                            <span class="badge bg-warning">Pending</span>
+                                                        {% elif deposit.status == 'APPROVED' %}
+                                                            <span class="badge bg-success">Approved</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger">Rejected</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ deposit.created_at|date:"M d, Y H:i" }}</td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="6" class="text-center">No recent deposits</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- container -->
+
+            </div>
+            <!-- content -->
+
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- End Page content -->
+        <!-- ============================================================== -->
+{% endblock content %}
