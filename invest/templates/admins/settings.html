@@ -32,119 +32,101 @@
 
             <!-- Settings Card -->
             <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="header-title mb-0">
-                                <i class="ri-wallet-3-line me-2"></i>Cryptocurrency Wallet Addresses
-                            </h4>
-                            <p class="text-muted mb-0">Update wallet addresses where users will send their deposits</p>
-                        </div>
-                        <div class="card-body">
-                            <form method="post" id="walletForm">
-                                {% csrf_token %}
-                                
-                                <div class="row">
-                                    <!-- Bitcoin Wallet -->
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card border border-warning">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="crypto-icon bg-warning text-white rounded-circle me-3">
-                                                        <i class="ri-currency-line"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h5 class="mb-0">Bitcoin (BTC)</h5>
-                                                        <small class="text-muted">Bitcoin wallet address</small>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="btc_wallet" class="form-label">BTC Wallet Address</label>
-                                                    <textarea class="form-control" name="btc_wallet" id="btc_wallet" rows="3" 
-                                                            placeholder="Enter Bitcoin wallet address">{{ cryptocurrencies.bitcoin.wallet_address|default:'' }}</textarea>
-                                                    <small class="form-text text-muted">
-                                                        <i class="ri-information-line"></i> Example: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
-                                                    </small>
-                                                </div>
-                                            </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="header-title mb-0">
+                    <i class="ri-wallet-3-line me-2"></i>Cryptocurrency Wallet Addresses
+                </h4>
+                <p class="text-muted mb-0">Update wallet addresses where users will send their deposits</p>
+            </div>
+            <div class="card-body">
+                <form method="post" id="walletForm">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <!-- Bitcoin Wallet -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card border border-warning">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="crypto-icon bg-warning text-white rounded-circle me-3">
+                                            <i class="ri-currency-line"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-0">Bitcoin (BTC)</h5>
+                                            <small class="text-muted">Bitcoin wallet address</small>
                                         </div>
                                     </div>
-
-                                    <!-- Ethereum Wallet -->
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card border border-primary">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="crypto-icon bg-primary text-white rounded-circle me-3">
-                                                        <i class="ri-currency-line"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h5 class="mb-0">Ethereum (ETH)</h5>
-                                                        <small class="text-muted">Ethereum wallet address</small>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="eth_wallet" class="form-label">ETH Wallet Address</label>
-                                                    <textarea class="form-control" name="eth_wallet" id="eth_wallet" rows="3" 
-                                                            placeholder="Enter Ethereum wallet address">{{ cryptocurrencies.ethereum.wallet_address|default:'' }}</textarea>
-                                                    <small class="form-text text-muted">
-                                                        <i class="ri-information-line"></i> Example: 0x742d35Cc6634C0532925a3b8D4020B2..
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Toncoin Wallet -->
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card border border-info">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="crypto-icon bg-info text-white rounded-circle me-3">
-                                                        <i class="ri-currency-line"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h5 class="mb-0">Toncoin (TON)</h5>
-                                                        <small class="text-muted">Toncoin wallet address</small>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="ton_wallet" class="form-label">TON Wallet Address</label>
-                                                    <textarea class="form-control" name="ton_wallet" id="ton_wallet" rows="3" 
-                                                            placeholder="Enter Toncoin wallet address">{{ cryptocurrencies.toncoin.wallet_address|default:'' }}</textarea>
-                                                    <small class="form-text text-muted">
-                                                        <i class="ri-information-line"></i> Example: UQBd...GvTd (TON format)
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Solana Wallet -->
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card border border-success">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="crypto-icon bg-success text-white rounded-circle me-3">
-                                                        <i class="ri-currency-line"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h5 class="mb-0">Solana (SOL)</h5>
-                                                        <small class="text-muted">Solana wallet address</small>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="sol_wallet" class="form-label">SOL Wallet Address</label>
-                                                    <textarea class="form-control" name="sol_wallet" id="sol_wallet" rows="3" 
-                                                            placeholder="Enter Solana wallet address">{{ cryptocurrencies.solana.wallet_address|default:'' }}</textarea>
-                                                    <small class="form-text text-muted">
-                                                        <i class="ri-information-line"></i> Example: 5fNfvyp5f11L7VySQNKxfDd5tqL65X9..
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="btc_wallet" class="form-label">BTC Wallet Address</label>
+                                        <textarea class="form-control" name="btc_wallet" id="btc_wallet" rows="3" 
+                                                placeholder="Enter Bitcoin wallet address">{{ cryptocurrencies.bitcoin.wallet_address|default:'' }}</textarea>
+                                        <small class="form-text text-muted">
+                                            <i class="ri-information-line"></i> Example: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+                                        </small>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Ethereum Wallet -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card border border-primary">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="crypto-icon bg-primary text-white rounded-circle me-3">
+                                            <i class="ri-currency-line"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-0">Ethereum (ETH)</h5>
+                                            <small class="text-muted">Ethereum wallet address</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="eth_wallet" class="form-label">ETH Wallet Address</label>
+                                        <textarea class="form-control" name="eth_wallet" id="eth_wallet" rows="3" 
+                                                placeholder="Enter Ethereum wallet address">{{ cryptocurrencies.ethereum.wallet_address|default:'' }}</textarea>
+                                        <small class="form-text text-muted">
+                                            <i class="ri-information-line"></i> Example: 0x742d35Cc6634C0532925a3b8D4020B2..
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- USDT TRC-20 Wallet -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card border border-success">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="crypto-icon bg-success text-white rounded-circle me-3">
+                                            <i class="ri-currency-line"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-0">USDT (TRC-20)</h5>
+                                            <small class="text-muted">Tether wallet address on TRON network</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="usdt_wallet" class="form-label">USDT Wallet Address</label>
+                                        <textarea class="form-control" name="usdt_wallet" id="usdt_wallet" rows="3" 
+                                                placeholder="Enter USDT TRC-20 wallet address">{{ cryptocurrencies.usdt.wallet_address|default:'' }}</textarea>
+                                        <small class="form-text text-muted">
+                                            <i class="ri-information-line"></i> Example: TYdK9...Xo9e (TRC-20 format)
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- end row -->
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
                                 <!-- Warning Notice -->
                                 <div class="alert alert-warning mb-4">

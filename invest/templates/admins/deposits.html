@@ -108,10 +108,11 @@
                                 </div>
                                 <div class="col-md-3">
                                     <select class="form-select" id="tierFilter">
-                                        <option value="">All Tiers</option>
-                                        <option value="ROYAL">Royal</option>
-                                        <option value="ELITE">Elite</option>
-                                        <option value="EXECUTIVE">Executive</option>
+                                        <option value="">All PLANS</option>
+                                        <option value="BASIC">BASIC</option>
+                                        <option value="STANDARD">STANDARD</option>
+                                        <option value="PROFESSIONAL">PROFESSIONAL</option>
+                                        <option value="ADVANCED">ADVANCED</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
@@ -119,8 +120,7 @@
                                         <option value="">All Cryptocurrencies</option>
                                         <option value="BTC">Bitcoin</option>
                                         <option value="ETH">Ethereum</option>
-                                        <option value="TON">Toncoin</option>
-                                        <option value="SOL">Solana</option>
+                                        <option value="USDT">USDT {Trc 20}</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
@@ -147,7 +147,7 @@
                                             <th>ID</th>
                                             <th>User</th>
                                             <th>Amount</th>
-                                            <th>Investment Tier</th>
+                                            <th>Investment Plan</th>
                                             <th>Cryptocurrency</th>
                                             <th>Transaction ID</th>
                                             <th>Status</th>
@@ -476,8 +476,8 @@ function showDepositDetails(depositId) {
                     <h6>Deposit Information</h6>
                     <p><strong>ID:</strong> #${depositId}</p>
                     <p><strong>Status:</strong> <span class="badge bg-success">Approved</span></p>
-                    <p><strong>Amount:</strong> $1,000.00</p>
-                    <p><strong>Investment Tier:</strong> Royal</p>
+                    <p><strong>Amount:</strong> $100 - $2999</p>
+                    <p><strong>Investment Plan:</strong> Basic</p>
                 </div>
                 <div class="col-md-6">
                     <h6>Transaction Details</h6>

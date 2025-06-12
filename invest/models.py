@@ -107,7 +107,7 @@ from decimal import Decimal
 #         # Update total profit
 #         self.total_profit = self.current_total_profit
         
-#         # Update balance
+##        Update balance
 #         self.balance = self.current_balance
         
 #         self.save()
