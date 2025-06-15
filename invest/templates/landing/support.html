@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Support | ProfitLynx</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -15,7 +14,7 @@
 </head>
 <body class="bg-white text-blue-900">
 
-  <!-- Header Section -->
+  <!-- Header -->
   <header class="bg-blue-900 text-white py-6">
     <div class="container mx-auto px-4 text-center">
       <h1 class="text-3xl font-bold">ProfitLynx Support</h1>
@@ -23,27 +22,40 @@
     </div>
   </header>
 
-  <!-- Main Support Section -->
+  <!-- Main Section -->
   <main class="container mx-auto px-4 py-10">
     <div class="max-w-3xl mx-auto text-center">
       <h2 class="text-2xl font-semibold mb-4">How can we help you today?</h2>
-      <p class="mb-6 text-gray-700">Reach out to us using live chat, or send us a message through the contact form below. Our support team will respond as soon as possible.</p>
-      
-      <!-- Contact Form -->
-      <form action="#" method="POST" class="bg-blue-50 p-6 rounded-xl shadow-md">
+      <p class="mb-6 text-gray-700">Fill out the form below and we’ll get back to you as soon as possible.</p>
+
+      <!-- Contact Form (HTML-only submission) -->
+      <form action="https://formsubmit.co/el/maniho" method="POST" class="bg-blue-50 p-6 rounded-xl shadow-md">
+        <!-- Hidden Options -->
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_subject" value="New Complaint from Profitlynx">
+        <input type="hidden" name="_next" value="https://yourdomain.com/thank-you.html"> <!-- replace this with your actual thank you page if needed -->
+
+        <!-- Name -->
         <div class="mb-4 text-left">
           <label for="name" class="block text-blue-900 font-medium mb-1">Your Name</label>
-          <input type="text" id="name" name="name" required class="w-full px-4 py-2 rounded-md border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          <input type="text" id="name" name="name" placeholder="Enter your full name" required class="w-full px-4 py-2 rounded-md border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
+
+        <!-- Email -->
         <div class="mb-4 text-left">
           <label for="email" class="block text-blue-900 font-medium mb-1">Your Email</label>
-          <input type="email" id="email" name="email" required class="w-full px-4 py-2 rounded-md border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          <input type="email" id="email" name="email" placeholder="Enter your email" required class="w-full px-4 py-2 rounded-md border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
+
+        <!-- Message -->
         <div class="mb-4 text-left">
-          <label for="message" class="block text-blue-900 font-medium mb-1">Your Message</label>
-          <textarea id="message" name="message" rows="4" required class="w-full px-4 py-2 rounded-md border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+          <label for="message" class="block text-blue-900 font-medium mb-1">Your Complaint</label>
+          <textarea id="message" name="message" rows="4" placeholder="Describe your complaint..." required class="w-full px-4 py-2 rounded-md border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
         </div>
-        <button type="submit" class="bg-blue-900 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition">Send Message</button>
+
+        <!-- Submit -->
+        <button type="submit" class="bg-blue-900 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition">Submit Complaint</button>
       </form>
     </div>
   </main>
@@ -54,22 +66,10 @@
   </footer>
 
   <script>
-    // Update year in footer
+    // Set footer year
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
-<!-- Smartsupp Live Chat script -->
-<script type="text/javascript">
-var _smartsupp = _smartsupp || {};
-_smartsupp.key = '1d33e31fa57d2f716bc6367d2c466844b8c8adc8';
-window.smartsupp||(function(d) {
-  var s,c,o=smartsupp=function(){ o._.push(arguments)};o._=[];
-  s=d.getElementsByTagName('script')[0];c=d.createElement('script');
-  c.type='text/javascript';c.charset='utf-8';c.async=true;
-  c.src='https://www.smartsuppchat.com/loader.js?';s.parentNode.insertBefore(c,s);
-})(document);
-</script>
-<noscript> Powered by <a href=“https://www.smartsupp.com” target=“_blank”>Smartsupp</a></noscript>
-<!-- End of Smartsupp Live Chat script -->
-		
+
 </body>
 </html>
+
