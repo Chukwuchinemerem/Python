@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
+from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
 from django.urls import reverse
@@ -43,7 +44,7 @@ class UserAdmin(BaseUserAdmin):
 @admin.register(InvestmentTier)
 class InvestmentTierAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'roi_percentage', 'duration_days', 
+        'name', 'roi_percentage', 'duration_hours', 
         'min_investment', 'max_investment', 'referral_bonus', 'is_active'
     )
     list_filter = ('is_active', 'name')
@@ -66,7 +67,7 @@ class InvestmentAdmin(admin.ModelAdmin):
         'end_date', 'is_completed', 'profit_earned'
     )
     list_filter = ('tier', 'is_completed', 'start_date')
-    search_fields = ('user__username', 'user__email')
+    search_fields = ('user_username', 'user_email')
     readonly_fields = ('start_date',)
     date_hierarchy = 'start_date'
 
@@ -78,7 +79,7 @@ class TransactionAdmin(admin.ModelAdmin):
         'cryptocurrency', 'created_at', 'processed_at'
     )
     list_filter = ('transaction_type', 'status', 'created_at', 'cryptocurrency')
-    search_fields = ('user__username', 'user__email', 'transaction_id')
+    search_fields = ('user_username', 'user_email', 'transaction_id')
     readonly_fields = ('created_at',)
     date_hierarchy = 'created_at'
     
@@ -110,7 +111,7 @@ class DepositRequestAdmin(admin.ModelAdmin):
         'status', 'created_at', 'processed_at', 'action_buttons'
     )
     list_filter = ('status', 'cryptocurrency', 'investment_tier', 'created_at')
-    search_fields = ('user__username', 'user__email', 'transaction_id')
+    search_fields = ('user_username', 'user_email', 'transaction_id')
     readonly_fields = ('created_at', 'wallet_address_used')
     date_hierarchy = 'created_at'
     
@@ -198,7 +199,7 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
         'status', 'created_at', 'processed_at', 'action_buttons'
     )
     list_filter = ('status', 'cryptocurrency', 'created_at')
-    search_fields = ('user__username', 'user__email', 'wallet_address')
+    search_fields = ('user_username', 'user_email', 'wallet_address')
     readonly_fields = ('created_at',)
     date_hierarchy = 'created_at'
     
