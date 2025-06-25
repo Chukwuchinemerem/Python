@@ -1,124 +1,7 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from decimal import Decimal
-
-# class User(AbstractUser):
-#     """Extended user model with investment platform specific fields"""
-#     first_name = models.CharField(max_length=100)
-#     last_name = models.CharField(max_length=100)
-#     email = models.EmailField(unique=True)
-#     phone = models.CharField(max_length=20)
-#     country = models.CharField(max_length=100)
-#     # profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-#     balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-#     total_deposited = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-#     total_withdrawn = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-#     total_profit = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-#     referral_code = models.CharField(max_length=20, unique=True, blank=True)
-#     referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
-#     date_joined = models.DateTimeField(default=timezone.now)
-#     is_verified = models.BooleanField(default=False)
-    
-#     def __str__(self):
-#         return f"{self.username} - {self.email}"
-    
-#     @property
-#     def current_balance(self):
-#         """Calculate current balance dynamically"""
-#         from django.db.models import Sum
-#         from decimal import Decimal
-        
-#         # Get approved deposits
-#         approved_deposits = self.transactions.filter(
-#             transaction_type='DEPOSIT', 
-#             status='APPROVED'
-#         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
-        
-#         # Get approved withdrawals
-#         approved_withdrawals = self.transactions.filter(
-#             transaction_type='WITHDRAWAL', 
-#             status='APPROVED'
-#         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
-        
-#         # Get profits
-#         profits = self.transactions.filter(
-#             transaction_type='PROFIT', 
-#             status='COMPLETED'
-#         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
-        
-#         # Get referral bonuses
-#         referral_bonuses = self.transactions.filter(
-#             transaction_type='REFERRAL', 
-#             status='COMPLETED'
-#         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
-        
-#         # Calculate balance: deposits + profits + referrals - withdrawals
-#         calculated_balance = approved_deposits + profits + referral_bonuses - approved_withdrawals
-        
-#         return calculated_balance
-    
-#     @property
-#     def current_total_withdrawn(self):
-#         """Calculate total withdrawn dynamically"""
-#         from django.db.models import Sum
-#         return self.transactions.filter(
-#             transaction_type='WITHDRAWAL', 
-#             status='APPROVED'
-#         ).aggregate(Sum('amount'))['amount__sum'] or 0
-    
-#     @property
-#     def current_total_profit(self):
-#         """Calculate total profit dynamically"""
-#         from django.db.models import Sum
-#         from decimal import Decimal
-        
-#         # Get profits from investments
-#         profits = self.transactions.filter(
-#             transaction_type='PROFIT', 
-#             status='COMPLETED'
-#         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
-        
-#         # Get referral bonuses
-#         referral_bonuses = self.transactions.filter(
-#             transaction_type='REFERRAL', 
-#             status='COMPLETED'
-#         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
-        
-#         return profits + referral_bonuses
-    
-#     def update_balances(self):
-#         """Update stored balance fields with calculated values"""
-#         from django.db.models import Sum
-#         from decimal import Decimal
-        
-#         # Update total deposited
-#         self.total_deposited = self.transactions.filter(
-#             transaction_type='DEPOSIT', 
-#             status='APPROVED'
-#         ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
-        
-#         # Update total withdrawn
-#         self.total_withdrawn = self.current_total_withdrawn
-        
-#         # Update total profit
-#         self.total_profit = self.current_total_profit
-        
-##        Update balance
-#         self.balance = self.current_balance
-        
-#         self.save()
-    
-#     def save(self, *args, **kwargs):
-#         if not self.referral_code:
-#             import random
-#             import string
-#             self.referral_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        
-#         super().save(*args, **kwargs)
 
 class User(AbstractUser):
     """Extended user model with investment platform specific fields"""
@@ -240,19 +123,18 @@ class User(AbstractUser):
         
         super().save(*args, **kwargs)
 
-
-
 class InvestmentTier(models.Model):
     """Investment tiers/packages"""
     TIER_CHOICES = [
-        ('ROYAL', 'Royal'),
-        ('ELITE', 'Elite'),
-        ('EXECUTIVE', 'Executive'),
+        ('BASIC', 'Basic'),
+        ('STANDARD', 'Standard'),
+        ('PROFESSIONAL', 'Professional'),
+        ('ADVANCED', 'Advanced'),
     ]
     
     name = models.CharField(max_length=20, choices=TIER_CHOICES, unique=True)
-    roi_percentage = models.DecimalField(max_digits=5, decimal_places=2)  # 20.00 for 20%
-    duration_hours = models.IntegerField(default=24)
+    roi_percentage = models.DecimalField(max_digits=5, decimal_places=2)  # e.g., 10.00 for 10%
+    duration_days = models.IntegerField(default=5)  # Changed from hours to days for clarity
     min_investment = models.DecimalField(max_digits=10, decimal_places=2)
     max_investment = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     referral_bonus = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)
@@ -291,7 +173,7 @@ class Investment(models.Model):
     def save(self, *args, **kwargs):
         if not self.end_date:
             from datetime import timedelta
-            self.end_date = self.start_date + timedelta(hours=self.tier.duration_hours)
+            self.end_date = self.start_date + timedelta(days=self.tier.duration_days)
         super().save(*args, **kwargs)
 
 class Transaction(models.Model):
@@ -374,7 +256,4 @@ class CryptoPrice(models.Model):
     last_updated = models.DateTimeField(default=timezone.now)
     
     def __str__(self):
-        return f"{self.cryptocurrency.symbol} - ${self.price_usd}"
-    
-    class Meta:
-        ordering = ['cryptocurrency__symbol']
+        return f"{self.cryptocurrency.symbol}"
