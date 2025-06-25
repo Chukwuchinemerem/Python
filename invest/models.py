@@ -1,7 +1,11 @@
 from django.db import models
+
+# Create your models here.
+from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from decimal import Decimal
+
 
 class User(AbstractUser):
     """Extended user model with investment platform specific fields"""
@@ -20,7 +24,7 @@ class User(AbstractUser):
     date_joined = models.DateTimeField(default=timezone.now)
     is_verified = models.BooleanField(default=False)
     
-    def __str__(self):
+    def _str_(self):
         return f"{self.username} - {self.email}"
     
     @property
@@ -123,25 +127,26 @@ class User(AbstractUser):
         
         super().save(*args, **kwargs)
 
+
+
 class InvestmentTier(models.Model):
     """Investment tiers/packages"""
     TIER_CHOICES = [
-        ('BASIC', 'Basic'),
-        ('STANDARD', 'Standard'),
-        ('PROFESSIONAL', 'Professional'),
-        ('ADVANCED', 'Advanced'),
+        ('ROYAL', 'Royal'),
+        ('ELITE', 'Elite'),
+        ('EXECUTIVE', 'Executive'),
     ]
     
     name = models.CharField(max_length=20, choices=TIER_CHOICES, unique=True)
-    roi_percentage = models.DecimalField(max_digits=5, decimal_places=2)  # e.g., 10.00 for 10%
-    duration_days = models.IntegerField(default=5)  # Changed from hours to days for clarity
+    roi_percentage = models.DecimalField(max_digits=5, decimal_places=2)  # 20.00 for 20%
+    duration_hours = models.IntegerField(default=24)
     min_investment = models.DecimalField(max_digits=10, decimal_places=2)
     max_investment = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     referral_bonus = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)
     incentive_description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     
-    def __str__(self):
+    def _str_(self):
         return f"{self.name} - {self.roi_percentage}% ROI"
 
 class CryptoCurrency(models.Model):
@@ -151,7 +156,7 @@ class CryptoCurrency(models.Model):
     wallet_address = models.CharField(max_length=200)
     is_active = models.BooleanField(default=True)
     
-    def __str__(self):
+    def _str_(self):
         return f"{self.name} ({self.symbol})"
     
     class Meta:
@@ -167,13 +172,13 @@ class Investment(models.Model):
     is_completed = models.BooleanField(default=False)
     profit_earned = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     
-    def __str__(self):
+    def _str_(self):
         return f"{self.user.username} - {self.tier.name} - ${self.amount}"
     
     def save(self, *args, **kwargs):
         if not self.end_date:
             from datetime import timedelta
-            self.end_date = self.start_date + timedelta(days=self.tier.duration_days)
+            self.end_date = self.start_date + timedelta(hours=self.tier.duration_hours)
         super().save(*args, **kwargs)
 
 class Transaction(models.Model):
@@ -206,7 +211,7 @@ class Transaction(models.Model):
     processed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_transactions')
     notes = models.TextField(blank=True)
     
-    def __str__(self):
+    def _str_(self):
         return f"{self.user.username} - {self.transaction_type} - ${self.amount} - {self.status}"
     
     class Meta:
@@ -225,7 +230,7 @@ class DepositRequest(models.Model):
     processed_at = models.DateTimeField(null=True, blank=True)
     processed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_deposits')
     
-    def __str__(self):
+    def _str_(self):
         return f"{self.user.username} - Deposit ${self.amount} - {self.status}"
     
     class Meta:
@@ -242,7 +247,7 @@ class WithdrawalRequest(models.Model):
     processed_at = models.DateTimeField(null=True, blank=True)
     processed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_withdrawals')
     
-    def __str__(self):
+    def _str_(self):
         return f"{self.user.username} - Withdrawal ${self.amount} - {self.status}"
     
     class Meta:
@@ -255,5 +260,8 @@ class CryptoPrice(models.Model):
     change_24h = models.DecimalField(max_digits=5, decimal_places=2)
     last_updated = models.DateTimeField(default=timezone.now)
     
-    def __str__(self):
-        return f"{self.cryptocurrency.symbol}"
+    def _str_(self):
+        return f"{self.cryptocurrency.symbol} - ${self.price_usd}"
+    
+    class Meta:
+        ordering = ['cryptocurrency__symbol']

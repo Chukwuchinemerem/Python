@@ -127,7 +127,7 @@ def dashboard(request):
         'total_balance': user.current_balance,  # Use dynamic calculation
         'active_investments': active_investments,
         'recent_transactions': user.transactions.all()[:5],
-        'crypto_prices': CryptoPrice.objects.filter(cryptocurrency__symbol__in=['BTC', 'ETH', 'SOL', 'TON'])[:4]
+        'crypto_prices': CryptoPrice.objects.filter(cryptocurrency_symbol_in=['BTC', 'ETH', 'SOL', 'TON'])[:4]
     }
     
     return render(request, 'invest/dashboard.html', context)

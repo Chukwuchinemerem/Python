@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const tierInput = card.querySelector('input[type="radio"]');
                 tierInput.checked = true;
                 updateTierDisplay();
-                amountFeedback.textContent = `✓ ${card.dataset.name} tier selected`;
+                amountFeedback.textContent = ✓ ${card.dataset.name} tier selected;
                 amountFeedback.className = 'form-text text-success';
                 break;
             }
@@ -290,10 +290,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (amount < min || amount > max) {
             const maxDisplay = max == 999999999 ? 'Unlimited' : '$' + max.toLocaleString();
-            amountFeedback.textContent = `Amount must be between $${min.toLocaleString()} - ${maxDisplay}`;
+            amountFeedback.textContent = Amount must be between $${min.toLocaleString()} - ${maxDisplay};
             amountFeedback.className = 'form-text text-danger';
         } else {
-            amountFeedback.textContent = `✓ Valid amount for ${card.dataset.name} tier`;
+            amountFeedback.textContent = ✓ Valid amount for ${card.dataset.name} tier;
             amountFeedback.className = 'form-text text-success';
         }
     }
